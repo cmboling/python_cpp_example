@@ -60,6 +60,7 @@ jobs:
     #    uses a compiled language
 
     - run: |
+        pip install pybind11
         python3 ./setup.py install
 
     - name: Perform CodeQL Analysis
