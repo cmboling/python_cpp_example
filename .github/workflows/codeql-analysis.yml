@@ -29,7 +29,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'cpp', 'python' ]
+        language: [ 'cpp' ]
         # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python' ]
         # Learn more:
         # https://docs.github.com/en/free-pro-team@latest/github/finding-security-vulnerabilities-and-errors-in-your-code/configuring-code-scanning#changing-the-languages-that-are-analyzed
@@ -40,19 +40,48 @@ jobs:
       with:
           submodules: recursive
 
-    # Initializes the CodeQL tools for scanning.
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v1
-      with:
-        languages: ${{ matrix.language }}
-        # If you wish to specify custom queries, you can do so here or in a config file.
-        # By default, queries listed here will override any specified in a config file.
-        # Prefix the list here with "+" to use these queries and those in the config file.
-        # queries: ./path/to/local/query, your-org/your-repo/queries@main
-
-    - name: Compile and package
+    # setup dev environment here if necessary
+    - name: Environment variables
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+        GITHUB_REF: ${{ github.ref }}
+        GITHUB_SHA: ${{ github.sha }}
+        GITHUB_REPO: ${{ github.repository }}
+        GITHUB_WORKSPACE: ${{ github.workspace }}
       run: |
-        whoami
-        python3 ./setup.py install
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v1
+        echo $GITHUB_TOKEN
+        echo $GITHUB_REF
+        echo $GITHUB_SHA
+        echo $GITHUB_REPO
+        echo $GITHUB_WORKSPACE
+    - name: Setup CodeQL Runner
+      run: |
+        pwd
+        wget -q https://github.com/github/codeql-action/releases/download/codeql-bundle-20201106/codeql-runner-linux
+        sudo install -o root -g root -m 0755 codeql-runner-linux /usr/local/bin/
+        ls -l
+        echo ${{ github.workspace }}
+    
+    - name: Execute CodeQL Runner
+      run: |
+        
+        latest_SHA_on_ref=$(git rev-parse HEAD)
+        default_branch=$(git symbolic-ref HEAD)
+        
+        sudo codeql-runner-linux init \
+          --checkout-path ${{ github.workspace }} \
+          --github-url https://github.com \
+          --repository ${{ github.repository }} \
+          --github-auth ${{ github.token }} \
+          --languages ${{ matrix.language }} \
+          --source-root=${{ github.workspace }} \
+           
+        sudo python3 ./setup.py install
+        
+        sudo codeql-runner-linux analyze \
+          --checkout-path ${{ github.workspace }} \
+          --github-url https://github.com \
+          --repository cmboling/${{ github.repository }} \
+          --github-auth ${{ github.token }} \
+          --commit $latest_SHA_on_ref \
+          --ref $default_branch
