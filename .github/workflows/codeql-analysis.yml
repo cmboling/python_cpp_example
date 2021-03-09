@@ -81,7 +81,7 @@ jobs:
         sudo codeql-runner-linux analyze \
           --checkout-path ${{ github.workspace }} \
           --github-url https://github.com \
-          --repository cmboling/${{ github.repository }} \
+          --repository ${{ github.repository }} \
           --github-auth ${{ github.token }} \
           --commit $latest_SHA_on_ref \
           --ref $default_branch
