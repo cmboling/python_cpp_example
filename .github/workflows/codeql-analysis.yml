@@ -52,6 +52,7 @@ jobs:
 
     - name: Compile and package
       run: |
+        whoami
         python3 ./setup.py install
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v1
