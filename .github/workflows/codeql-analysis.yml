@@ -75,6 +75,8 @@ jobs:
           --github-auth ${{ github.token }} \
           --languages ${{ matrix.language }} \
           --source-root=${{ github.workspace }} \
+        
+        source /home/runner/work/python_cpp_example/python_cpp_example/codeql-runner/codeql-env.sh
            
         sudo python3 ./setup.py install
         
