@@ -87,3 +87,10 @@ jobs:
           --github-auth ${{ github.token }} \
           --commit $latest_SHA_on_ref \
           --ref $default_branch
+    
+    - name: Upload extractor specific logs
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v2
+      with:
+        name: extractor-logs-${{ matrix.language }}-db
+        path: ${{ github.workspace }}/codeql-runner/codeql_databases/cpp/log
